@@ -54,14 +54,14 @@ function renderGames() {
     card.innerHTML = `
       <div>
         <h3 class="text-lg font-semibold">${game.name}</h3>
-        <p class="text-sm text-gray-600">Size: ${game.size.toFixed(2)} GB</p>
+        <p class="text-sm text-gray-600">Size: ${formatSize(game.size)} GB</p>
         <p class="text-sm font-medium">
-          Rp ${price.toLocaleString()}
+          Rp ${formatPrice(price)}
           ${
             game.discount && game.discount > 0
-              ? `<span class="line-through text-gray-400 text-xs ml-2">Rp ${(
+              ? `<span class="line-through text-gray-400 text-xs ml-2">Rp ${formatPrice(
                   Math.round(game.size.toFixed(2)) * 2000
-                ).toLocaleString()}</span>`
+                )}</span>`
               : ""
           }
         </p>
@@ -226,9 +226,9 @@ function renderCheckout() {
     item.innerHTML = `
           <div>
             <p class="font-medium">${game.name}</p>
-            <p class="text-xs text-gray-600">${game.size.toFixed(
-              2
-            )} GB - Rp ${price.toLocaleString()}</p>
+            <p class="text-xs text-gray-600">
+              ${formatSize(game.size)} GB - Rp ${formatPrice(price)}
+            </p>
           </div>
           <button onclick="removeFromCart('${game.name}')" 
             class="w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600">
@@ -237,8 +237,9 @@ function renderCheckout() {
         `;
     checkoutList.appendChild(item);
   });
-  totalPriceEl.textContent = "Rp " + total.toLocaleString();
-  totalSizeEl.textContent = totalSize.toFixed(2) + " GB";
+
+  totalPriceEl.textContent = "Rp " + formatPrice(total);
+  totalSizeEl.textContent = formatSize(totalSize) + " GB";
 }
 
 // Kirim ke WhatsApp
@@ -276,4 +277,14 @@ function getGamePrice(game) {
 
   const discount = game.discount ? game.discount : 0;
   return Math.round(basePrice * (1 - discount));
+}
+
+// Format harga (Rp dengan titik ribuan)
+function formatPrice(value) {
+  return value.toLocaleString("id-ID"); // otomatis Rp 120.000
+}
+
+// Format ukuran GB (pakai koma sebagai desimal)
+function formatSize(value) {
+  return value.toFixed(2).replace(".", ","); // 1,25
 }
