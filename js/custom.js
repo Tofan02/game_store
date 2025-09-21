@@ -42,23 +42,29 @@ function renderGames() {
   gameCountEl.textContent = `Menampilkan ${pageItems.length} dari ${filteredGames.length} game — Halaman ${currentPage}/${totalPages}`;
 
   pageItems.forEach((game) => {
-    const price =
-      Math.round(game.size.toFixed(2)) * 2000 > 0
-        ? Math.round(game.size.toFixed(2)) * 2000
-        : 1000;
+    const price = getGamePrice(game);
 
     const inCart = cart.find((item) => item.name === game.name);
 
     const card = document.createElement("div");
     card.className =
       "bg-gray-50 rounded-xl p-4 shadow hover:shadow-lg transition cursor-pointer flex flex-col justify-between";
-    card.onclick = () => toggleCart(game.name); // ✅ pakai nama, bukan index
+    card.onclick = () => toggleCart(game.name);
 
     card.innerHTML = `
       <div>
         <h3 class="text-lg font-semibold">${game.name}</h3>
         <p class="text-sm text-gray-600">Size: ${game.size.toFixed(2)} GB</p>
-        <p class="text-sm font-medium">Rp ${price.toLocaleString()}</p>
+        <p class="text-sm font-medium">
+          Rp ${price.toLocaleString()}
+          ${
+            game.discount && game.discount > 0
+              ? `<span class="line-through text-gray-400 text-xs ml-2">Rp ${(
+                  Math.round(game.size.toFixed(2)) * 2000
+                ).toLocaleString()}</span>`
+              : ""
+          }
+        </p>
       </div>
       <button onclick="event.stopPropagation(); toggleCart('${game.name}')" 
         class="mt-3 px-3 py-2 rounded-lg flex items-center justify-center gap-2 font-medium
@@ -78,6 +84,7 @@ function renderGames() {
         }">${inCart ? "Batalkan" : "Pilih"}</span>
       </button>
     `;
+
     gameList.appendChild(card);
   });
 }
@@ -210,10 +217,7 @@ function renderCheckout() {
   let total = 0;
   let totalSize = 0;
   cart.forEach((game) => {
-    const price =
-      Math.round(game.size.toFixed(2)) * 2000 > 0
-        ? Math.round(game.size.toFixed(2)) * 2000
-        : 1000;
+    const price = getGamePrice(game);
     total += price;
     totalSize += game.size;
     const item = document.createElement("div");
@@ -262,4 +266,14 @@ function sendToWhatsApp() {
   const phone = "6283152898011"; // nomor WA tujuan
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   window.open(url, "_blank");
+}
+
+function getGamePrice(game) {
+  const basePrice =
+    Math.round(game.size.toFixed(2)) * 2000 > 0
+      ? Math.round(game.size.toFixed(2)) * 2000
+      : 1000;
+
+  const discount = game.discount ? game.discount : 0;
+  return Math.round(basePrice * (1 - discount));
 }
