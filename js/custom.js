@@ -59,9 +59,9 @@ function renderGames() {
           Rp ${formatPrice(price)}
           ${
             game.discount && game.discount > 0
-              ? `<span class="line-through text-gray-400 text-xs ml-2">Rp ${formatPrice(
-                  Math.round(game.size.toFixed(2)) * 2000
-                )}</span>`
+              ? `<span class="line-through text-gray-400 text-xs ml-2">
+                  Rp ${formatPrice(Math.round(game.size * 2000))}
+                </span>`
               : ""
           }
         </p>
@@ -251,18 +251,18 @@ function sendToWhatsApp() {
 
   let message = "*List Beli Game*\n\n";
   cart.forEach((game, i) => {
-    const price = game.size.toFixed(2) * 2000;
-    message += `${i + 1}. *${game.name}*\n${game.size.toFixed(
-      2
-    )} GB - Rp ${price.toLocaleString()}\n\n`;
+    const price = getGamePrice(game);
+    message += `${i + 1}. *${game.name}*\n${formatSize(
+      game.size
+    )} GB - Rp ${formatPrice(price)}\n\n`;
   });
 
   let totalSize = cart.reduce((sum, g) => sum + g.size, 0);
-  let totalPrice = cart.reduce((sum, g) => sum + g.size * 2000, 0);
+  let totalPrice = cart.reduce((sum, g) => sum + getGamePrice(g), 0);
 
   message += "────────────────────\n";
-  message += `Total Size : *${totalSize.toFixed(2)} GB*\n`;
-  message += `Total Bayar: *Rp ${totalPrice.toLocaleString()}*`;
+  message += `Total Size : *${formatSize(totalSize)} GB*\n`;
+  message += `Total Bayar: *Rp ${formatPrice(totalPrice)}*`;
 
   const phone = "6283152898011"; // nomor WA tujuan
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
@@ -271,12 +271,12 @@ function sendToWhatsApp() {
 
 function getGamePrice(game) {
   const basePrice =
-    Math.round(game.size.toFixed(2)) * 2000 > 0
-      ? Math.round(game.size.toFixed(2)) * 2000
-      : 1000;
+    Math.round(game.size) * 2000 > 0 ? Math.round(game.size) * 2000 : 1000;
 
-  const discount = game.discount ? game.discount : 0;
-  return Math.round(basePrice * (1 - discount));
+  if (game.discount && game.discount > 0) {
+    return Math.round(basePrice * (1 - game.discount));
+  }
+  return basePrice;
 }
 
 // Format harga (Rp dengan titik ribuan)
