@@ -98,6 +98,10 @@
       </div>
     </div>
 
-    <script src="js/custom.js"></script>
+    <script>
+      const script = document.createElement("script");
+      script.src = "js/custom.js?v=" + new Date().getTime();
+      document.head.appendChild(script);
+    </script>
   </body>
 </html>
